@@ -21,7 +21,7 @@ if (project.hasProperty("dev")) {
     version += "-" + dev
 }
 
-group = "mchorse.mappet"
+group = "magmaout.mappet"
 archivesBaseName = "mappet"
 sourceCompatibility = targetCompatibility = "1.8"
 compileJava.options.encoding = 'UTF-8'
@@ -30,12 +30,8 @@ minecraft {
 
     mappings channel: 'snapshot', version: '20171003-1.12'
 
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-
     accessTransformer = file('src/main/resources/META-INF/mappet_at.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
     runs {
         client {
             workingDirectory project.file('run')
@@ -64,48 +60,24 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
-    compileOnly files("run/libs/blockbuster-${blockbuster}-${mcversion}-dev.jar")
-    compileOnly files("run/libs/metamorph-${metamorph}-${mcversion}-dev.jar")
-    compileOnly files("run/libs/mclib-${mclib}-${mcversion}-dev.jar")
-    compileOnly files("run/libs/aperture-${aperture}-${mcversion}-dev.jar")
+    compileOnly files("run/mods/blockbuster-dev.jar")
+    compileOnly files("run/mods/metamorph-dev.jar")
+    compileOnly files("run/mods/aperture-dev.jar")
+    compileOnly files("run/mods/mclib-dev.jar")
+    compileOnly files("run/mods/nashorn.jar")
     implementation("org.reflections:reflections:0.10.2")
     implementation("net.minecraftforge:mergetool:0.2.3.3") { force = true }
-
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
 }
-
-// Example for how to get properties into the manifest for reading by the runtime...
 jar {
 
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('shadowJar')
 jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
-
 
 // BY DYAMO BOLSHOY UMNI MALCHEG
 import org.apache.tools.ant.filters.ReplaceTokens
+import java.util.stream.Collectors
 
 task processSource(type: Sync) {
     outputs.upToDateWhen { false }
@@ -116,7 +88,7 @@ task processSource(type: Sync) {
             MCLIB      : mclib,
             METAMORPH  : metamorph,
             BLOCKBUSTER: blockbuster,
-            APERTURE   : aperture,
+            APERTURE: aperture
     ])
     into "$buildDir/src"
 }
@@ -140,7 +112,7 @@ shadowJar {
     ]
 
     for (dependency in dependenciesToRelocate) {
-        relocate dependency, "mchorse.mappet.libs." + dependency
+        relocate dependency, "magmaout.mappet.libs." + dependency
     }
 }
 
@@ -188,18 +160,14 @@ artifacts {
 task scriptingJavadocs(type: Javadoc) {
     source = sourceSets.main.allJava
 
-    include "mchorse/mappet/api/ui/components/**"
-    include "mchorse/mappet/client/gui/utils/graphics/Graphic**"
-    include "mchorse/mappet/api/scripts/user/**"
+    include "magmaout/mappet/api/ui/components/**"
+    include "magmaout/mappet/client/gui/utils/graphics/Graphic**"
+    include "magmaout/mappet/api/scripts/user/**"
 }
 
 task scriptingJavadocsJson(type: Exec) {
-    // Writing gradle tasks is PAIN, if you'll ever would need to run this, clone and build:
-    // https://github.com/mchorse/jsonDoclet
-    //
-    // Rename it to jsonDoclet.jar, and place it in the run/ folder
     executable "javadoc"
-    args "-doclet", "mchorse.utils.doclets.JsonDoclet", "-docletpath", "./run/jsonDoclet.jar", "-sourcepath", "./src/main/java/", "-subpackages", "mchorse.mappet.api.scripts.user:mchorse.mappet.api.ui.components:mchorse.mappet.client.gui.utils.graphics"
+    args "-doclet", "mchorse.utils.doclets.JsonDoclet", "-docletpath", "./src/main/resources/assets/mappet/jsonDoclet.jar", "-sourcepath", "./src/main/java/", "-subpackages", "magmaout.mappet.api.scripts.user:magmaout.mappet.api.ui.components:magmaout.mappet.client.gui.utils.graphics"
 
     doLast {
         file("src/main/resources/assets/mappet/docs.json").setText(file("docs.json").text)
@@ -208,10 +176,9 @@ task scriptingJavadocsJson(type: Exec) {
 
 tasks.processResources.dependsOn(scriptingJavadocsJson)
 
-/* Comparing keys */
 task compareLangFiles {
     doLast {
-        def help = file("src/main/resources/assets/${project.archivesBaseName}/lang/")
+        def help = file("src/main/resources/assets/${archivesBaseName}/lang/")
         def parse = { File file ->
             def map = new HashMap()
             def splits = file.text.split("\n");
@@ -304,7 +271,7 @@ task copyLangStrings {
             return map
         }
 
-        def help = file("src/main/resources/assets/${project.archivesBaseName}/lang/")
+        def help = file("src/main/resources/assets/${archivesBaseName}/lang/")
         def en = file("${help.getAbsolutePath()}/en_US.lang")
 
         for (file in help.listFiles()) {

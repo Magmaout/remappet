@@ -1,7 +1,7 @@
 {
-    "variants": {
-        "normal": {
-            "model": "mappet:region"
-        }
+  "variants": {
+    "normal": {
+      "model": "mappet:region"
     }
+  }
 }

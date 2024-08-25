@@ -1,7 +1,7 @@
 {
-    "variants": {
-        "normal": {
-            "model": "mappet:condition_model"
-        }
+  "variants": {
+    "normal": {
+      "model": "mappet:condition_model"
     }
+  }
 }
