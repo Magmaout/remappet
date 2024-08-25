@@ -1,0 +1,20 @@
+package magmaout.mappet.commands.morphs;
+
+import magmaout.mappet.commands.MappetSubCommandBase;
+import net.minecraft.command.ICommandSender;
+
+public class CommandMorph extends MappetSubCommandBase {
+    public CommandMorph() {
+        this.add(new CommandMorphAdd());
+    }
+
+    @Override
+    public String getName() {
+        return "morph";
+    }
+
+    @Override
+    public String getUsage(ICommandSender sender) {
+        return "mappet.commands.mp.morph.help";
+    }
+}
