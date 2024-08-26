@@ -55,9 +55,6 @@ minecraft {
 
 
 dependencies {
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
     compileOnly files("run/mods/blockbuster-dev.jar")
@@ -127,7 +124,6 @@ task prepareAssets(type: Copy) {
     from (sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        // Replace version
         expand(project.properties)
     }
     from(sourceSets.main.resources.srcDirs) {
@@ -141,7 +137,6 @@ classes.dependsOn(prepareAssets)
 
 tasks.withType(Jar).all { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 
-/* Dev build */
 task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'dev'

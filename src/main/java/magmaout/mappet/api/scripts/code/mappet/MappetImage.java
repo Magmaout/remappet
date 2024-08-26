@@ -1,10 +1,7 @@
 package magmaout.mappet.api.scripts.code.mappet;
 
 import magmaout.mappet.api.scripts.user.mappet.IMappetImage;
-import magmaout.mappet.network.Dispatcher;
-import magmaout.mappet.network.scripts.PacketDownloadImage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.integrated.IntegratedServer;
 
 import javax.imageio.ImageIO;
@@ -53,12 +50,20 @@ public class MappetImage implements IMappetImage {
     }
 
     @Override
-    public void addOverlay(IMappetImage overlay, int x, int y, boolean erase) {
+    public void addOverlay(IMappetImage overlay, boolean erase) { overlayImage(overlay, 0, 0, erase); }
+    @Override
+    public void addOverlay(IMappetImage overlay, int x, int y) { overlayImage(overlay, x, y, false); }
+    @Override
+    public void addOverlay(IMappetImage overlay, int x, int y, boolean erase) { overlayImage(overlay, x, y, erase); }
+
+    private void overlayImage(IMappetImage overlay, int x, int y, boolean erase) {
         BufferedImage image = new BufferedImage(this.image.getWidth(), this.image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         g.drawImage(this.image, 0, 0, null);
+        if (erase) g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, 1.0f));
         g.drawImage(overlay.getBufferedImage(), x, y, null);
         g.dispose();
+        this.image = image;
     }
 
     @Override
@@ -67,13 +72,12 @@ public class MappetImage implements IMappetImage {
     }
 
     @Override
-    public void forceDownload(String name) {
+    public void saveToWorld(String name) {
         IntegratedServer server = Minecraft.getMinecraft().getIntegratedServer();
         Path path = Paths.get(server.getEntityWorld().getSaveHandler().getWorldDirectory().getPath(), "mappet/textures");
         name = name.endsWith(".png") ? name : name + ".png";
         try {
             if (!Files.exists(path)) Files.createDirectories(path);
-            for (EntityPlayerMP player : server.getPlayerList().getPlayers()) Dispatcher.sendTo(new PacketDownloadImage(this.image, name), player);
             path = path.resolve(name);
             ImageIO.write(this.image, "png", path.toFile());
         } catch (IOException e) {}

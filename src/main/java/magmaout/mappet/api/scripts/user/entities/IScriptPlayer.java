@@ -121,6 +121,11 @@ public interface IScriptPlayer extends IScriptEntity {
     void getClipboard(Consumer<Object> callback);
 
     /**
+     * Refresh all resources for the current player
+     */
+    void refreshResources();
+
+    /**
      * Gets the player's screen resolution.
      *
      * <pre>{@code

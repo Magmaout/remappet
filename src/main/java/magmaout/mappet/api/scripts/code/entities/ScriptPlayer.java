@@ -17,6 +17,7 @@ import magmaout.mappet.api.scripts.user.render.IScriptCamera;
 import magmaout.mappet.api.scripts.user.render.IScriptHand;
 import magmaout.mappet.api.ui.UI;
 import magmaout.mappet.api.ui.UIContext;
+import magmaout.mappet.network.scripts.PacketRefreshResources;
 import magmaout.mappet.network.utils.PacketClientData;
 import magmaout.mappet.utils.AccessType;
 import magmaout.mappet.utils.CapabilityTypes;
@@ -39,6 +40,10 @@ import mchorse.metamorph.api.MorphUtils;
 import mchorse.metamorph.api.morphs.AbstractMorph;
 import mchorse.metamorph.capabilities.morphing.IMorphing;
 import mchorse.metamorph.capabilities.morphing.Morphing;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.ICriterionTrigger;
+import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -141,6 +146,11 @@ public class ScriptPlayer extends ScriptEntity<EntityPlayerMP> implements IScrip
         UUID uniqueId = UUID.randomUUID();
         PacketClientData.сallBack.put(uniqueId, callback);
         Dispatcher.sendTo(new PacketClientData(ClientData.CLIPBOARD, AccessType.GET, uniqueId), this.getMinecraftPlayer());
+    }
+
+    @Override
+    public void refreshResources() {
+        Dispatcher.sendTo(new PacketRefreshResources(), this.entity);
     }
 
     @Override
