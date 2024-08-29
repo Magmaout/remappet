@@ -29,12 +29,10 @@ public class ScriptNpc extends ScriptEntity<EntityNpc> implements IScriptNpc {
     }
 
     @Override
-    public boolean setMorph(AbstractMorph morph) {
+    public void setMorph(AbstractMorph morph) {
         this.entity.getState().morph = MorphUtils.copy(morph);
         this.entity.setMorph(this.entity.getState().morph);
         this.entity.sendNpcStateChangePacket();
-
-        return true;
     }
 
     @Override

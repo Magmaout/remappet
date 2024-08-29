@@ -1,6 +1,7 @@
 package magmaout.mappet.api.scripts.user.render;
 
 import magmaout.mappet.api.scripts.user.data.ScriptVector;
+import mchorse.metamorph.api.morphs.AbstractMorph;
 
 public interface IScriptHand {
 
@@ -11,6 +12,31 @@ public interface IScriptHand {
     String getSkinPath();
 
     String getSkinType();
+
+    /**
+     * Get hands morph.
+     *
+     * <pre>{@code
+     *    var s = c.getPlayer();
+     *    var morph = mappet.createMorph("{Name:\"blockbuster.alex\"}");
+     *    var entityMorph = s.getMorph();
+     *
+     *    if (entityMorph != null && entityMorph.equals(morph)) {
+     *        c.send(s.getName() + " is morphed into Alex morph!");
+     *    }
+     * }</pre>
+     */
+    public AbstractMorph getMorph();
+
+    /**
+     * Set hands morph.
+     *
+     * <pre>{@code
+     *    var morph = mappet.createMorph('{Name:"blockbuster.alex"}');
+     *    c.getPlayer().getHand(0).setMorph(morph);
+     * }</pre>
+     */
+    public void setMorph(AbstractMorph morph);
 
     /**
      * Resets the render, rotations and position of the hand.

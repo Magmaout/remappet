@@ -60,6 +60,7 @@ dependencies {
     compileOnly files("run/mods/blockbuster-dev.jar")
     compileOnly files("run/mods/metamorph-dev.jar")
     compileOnly files("run/mods/aperture-dev.jar")
+    compileOnly files("run/mods/chameleon-dev.jar")
     compileOnly files("run/mods/mclib-dev.jar")
     compileOnly files("run/mods/nashorn.jar")
     implementation("org.reflections:reflections:0.10.2")
@@ -85,6 +86,7 @@ task processSource(type: Sync) {
             MCLIB      : mclib,
             METAMORPH  : metamorph,
             BLOCKBUSTER: blockbuster,
+            CHAMELEON: chameleon,
             APERTURE: aperture
     ])
     into "$buildDir/src"

@@ -2,14 +2,25 @@ package magmaout.mappet.utils;
 
 import com.google.common.base.MoreObjects;
 import magmaout.mappet.api.scripts.code.entities.ScriptPlayer;
+import magmaout.mappet.capabilities.character.Character;
 import magmaout.mappet.capabilities.hand.Hand;
+import magmaout.mappet.capabilities.hand.IHand;
 import magmaout.mappet.network.Dispatcher;
 import magmaout.mappet.network.scripts.PacketCapability;
 import mchorse.blockbuster.ClientProxy;
 import mchorse.blockbuster.client.model.ModelCustom;
 import mchorse.blockbuster.client.render.RenderCustomModel;
 import mchorse.blockbuster.core.transformers.RenderEntityItemTransformer;
+import mchorse.chameleon.lib.render.ChameleonRenderer;
+import mchorse.chameleon.metamorph.ChameleonMorph;
+import mchorse.mclib.utils.DummyEntity;
+import mchorse.metamorph.api.MorphUtils;
 import mchorse.metamorph.api.models.IMorphProvider;
+import mchorse.metamorph.api.morphs.AbstractMorph;
+import mchorse.metamorph.capabilities.morphing.IMorphing;
+import mchorse.metamorph.capabilities.morphing.Morphing;
+import mchorse.metamorph.client.render.RenderMorph;
+import mchorse.metamorph.entity.EntityMorph;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -37,8 +48,11 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.storage.MapData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.opengl.GL11;
 
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,15 +63,20 @@ public class MappetHands {
     private static ItemRenderer itemRenderer = Minecraft.getMinecraft().getItemRenderer();
     private static ItemStack itemStackMainHand = ItemStack.EMPTY;
     private static ItemStack itemStackOffHand = ItemStack.EMPTY;
-    private static ResourceLocation skinPath;
     private static float equippedProgressMainHand;
     private static float prevEquippedProgressMainHand;
     private static float equippedProgressOffHand;
     private static float prevEquippedProgressOffHand;
 
     public static void renderArms() {
-        if (mc.gameSettings.thirdPersonView != 0 || mc.player.isPlayerSleeping() || mc.gameSettings.hideGUI || mc.playerController.isSpectator()) return;
+        if (
+            mc.gameSettings.thirdPersonView != 0 ||
+            mc.playerController.isSpectator() ||
+            mc.player.isPlayerSleeping() ||
+            mc.gameSettings.hideGUI
+        ) return;
 
+        Vector3d offset = new Vector3d();
         EntityRenderer entityRenderer = mc.entityRenderer;
         AbstractClientPlayer player = mc.player;
         float partialTicks = mc.getRenderPartialTicks();
@@ -66,28 +85,53 @@ public class MappetHands {
         float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
         float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * partialTicks;
 
-        rotateArroundXAndY(f1, f2);
+        Character character = Character.get(player);
+        Hand hand = Hand.get(player);
+
+        RenderHelper.enableStandardItemLighting();
         setLightmap();
-        rotateArm(partialTicks);
         entityRenderer.enableLightmap();
         GlStateManager.enableRescaleNormal();
 
-        float f3 = enumhand == EnumHand.MAIN_HAND ? f : 0.0F;
-        float f5 = 1.0F - (prevEquippedProgressMainHand + (equippedProgressMainHand - prevEquippedProgressMainHand) * partialTicks);
-        if (!net.minecraftforge.client.ForgeHooksClient.renderSpecificFirstPersonHand(EnumHand.MAIN_HAND, partialTicks, f1, f3, f5, itemStackMainHand))
-            renderItemInFirstPerson(player, partialTicks, f1, EnumHand.MAIN_HAND, f3, itemStackMainHand, f5);
+        if (character.morph != null) {
+            float angle = ((1 - partialTicks) * player.prevRenderYawOffset) + (partialTicks * player.renderYawOffset);
+            offset = new Vector3d((0.35 * Math.sin(Math.toRadians(angle))), 0, -(0.35 * Math.cos(Math.toRadians(angle))));
+            renderMorphInFirstPerson(player, character.morph, partialTicks, offset);
+        } else {
+            if (hand.morph != null) {
+                rotateArroundXAndY(f1, f2);
+                rotateArm(partialTicks);
 
-        float f4 = enumhand == EnumHand.OFF_HAND ? f : 0.0F;
-        float f6 = 1.0F - (prevEquippedProgressOffHand + (equippedProgressOffHand - prevEquippedProgressOffHand) * partialTicks);
-        if (!net.minecraftforge.client.ForgeHooksClient.renderSpecificFirstPersonHand(EnumHand.OFF_HAND, partialTicks, f1, f4, f6, itemStackOffHand))
-            renderItemInFirstPerson(player, partialTicks, f1, EnumHand.OFF_HAND, f4, itemStackOffHand, f6);
+                float renderYawOffset = player.prevRenderYawOffset + (player.renderYawOffset - player.prevRenderYawOffset) * partialTicks;
+                GlStateManager.rotate(renderYawOffset - 180, 0, 1, 0);
+                offset = new Vector3d(hand.mainPosition.x, hand.mainPosition.y - hand.morph.getEyeHeight(player), hand.mainPosition.z);
+                renderMorphInFirstPerson(player, hand.morph, partialTicks, offset);
+            } else {
+                rotateArroundXAndY(f1, f2);
+                rotateArm(partialTicks);
+
+                float f3 = enumhand == EnumHand.MAIN_HAND ? f : 0.0F;
+                float f5 = 1.0F - (prevEquippedProgressMainHand + (equippedProgressMainHand - prevEquippedProgressMainHand) * partialTicks);
+                if (!net.minecraftforge.client.ForgeHooksClient.renderSpecificFirstPersonHand(EnumHand.MAIN_HAND, partialTicks, f1, f3, f5, itemStackMainHand))
+                    renderItemInFirstPerson(player, partialTicks, EnumHand.MAIN_HAND, f3, itemStackMainHand, f5);
+
+                float f4 = enumhand == EnumHand.OFF_HAND ? f : 0.0F;
+                float f6 = 1.0F - (prevEquippedProgressOffHand + (equippedProgressOffHand - prevEquippedProgressOffHand) * partialTicks);
+                if (!net.minecraftforge.client.ForgeHooksClient.renderSpecificFirstPersonHand(EnumHand.OFF_HAND, partialTicks, f1, f4, f6, itemStackOffHand))
+                    renderItemInFirstPerson(player, partialTicks, EnumHand.OFF_HAND, f4, itemStackOffHand, f6);
+            }
+        }
 
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();
         entityRenderer.disableLightmap();
     }
 
-    public static void renderItemInFirstPerson(AbstractClientPlayer player, float partialTicks, float deltaPitch, EnumHand side, float swingProgress, ItemStack stack, float equipedProgress) {
+    public static void renderMorphInFirstPerson(AbstractClientPlayer player, AbstractMorph morph, float partialTicks, Vector3d offset) {
+        MorphUtils.render(morph, player, offset.x, offset.y, offset.z, 0, partialTicks);
+    }
+
+    private static void renderItemInFirstPerson(AbstractClientPlayer player, float partialTicks, EnumHand side, float swingProgress, ItemStack stack, float equipedProgress) {
         EnumHandSide enumhandside = side == EnumHand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
         Hand hand = Hand.get(player);
         GlStateManager.pushMatrix();
@@ -181,11 +225,20 @@ public class MappetHands {
 
         RenderPlayer renderPlayer = new RenderPlayer(renderManager, hand.skinType.isEmpty() ? false : (hand.skinType.contains("slim") ? true : false));
         mc.getTextureManager().bindTexture(hand.skinPath.isEmpty() ? player.getLocationSkin() : new ResourceLocation(hand.skinPath));
+        IMorphing morph = Morphing.get(player);
         GlStateManager.disableCull();
         if (flag) {
-            renderPlayer.renderRightArm(player);
+            if (morph != null && morph.isMorphed()) {
+                morph.getCurrentMorph().renderHand(player, EnumHand.MAIN_HAND);
+            } else {
+                renderPlayer.renderRightArm(player);
+            }
         } else {
-            renderPlayer.renderLeftArm(player);
+            if (morph != null && morph.isMorphed()) {
+                morph.getCurrentMorph().renderHand(player, EnumHand.OFF_HAND);
+            } else {
+                renderPlayer.renderLeftArm(player);
+            }
         }
         GlStateManager.enableCull();
     }
@@ -194,7 +247,6 @@ public class MappetHands {
         GlStateManager.pushMatrix();
         GlStateManager.rotate(angle, 1.0F, 0.0F, 0.0F);
         GlStateManager.rotate(angleY, 0.0F, 1.0F, 0.0F);
-        RenderHelper.enableStandardItemLighting();
         GlStateManager.popMatrix();
     }
 

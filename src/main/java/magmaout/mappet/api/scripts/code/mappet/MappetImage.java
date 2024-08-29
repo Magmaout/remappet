@@ -1,6 +1,11 @@
 package magmaout.mappet.api.scripts.code.mappet;
 
+import magmaout.mappet.api.scripts.user.IScriptServer;
+import magmaout.mappet.api.scripts.user.IScriptWorld;
+import magmaout.mappet.api.scripts.user.entities.IScriptPlayer;
 import magmaout.mappet.api.scripts.user.mappet.IMappetImage;
+import magmaout.mappet.network.Dispatcher;
+import magmaout.mappet.network.scripts.PacketDownloadImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
 
@@ -72,15 +77,19 @@ public class MappetImage implements IMappetImage {
     }
 
     @Override
-    public void saveToWorld(String name) {
-        IntegratedServer server = Minecraft.getMinecraft().getIntegratedServer();
-        Path path = Paths.get(server.getEntityWorld().getSaveHandler().getWorldDirectory().getPath(), "mappet/textures");
+    public void downloadTo(IScriptWorld world, String name) {
+        Path path = Paths.get(world.getMinecraftWorld().getSaveHandler().getWorldDirectory().getPath(), "mappet/textures");
         name = name.endsWith(".png") ? name : name + ".png";
         try {
             if (!Files.exists(path)) Files.createDirectories(path);
             path = path.resolve(name);
             ImageIO.write(this.image, "png", path.toFile());
         } catch (IOException e) {}
+    }
+
+    @Override
+    public void downloadTo(IScriptPlayer player, String name) {
+        Dispatcher.sendTo(new PacketDownloadImage(this.image, name), player.getMinecraftPlayer());
     }
 
     @Override

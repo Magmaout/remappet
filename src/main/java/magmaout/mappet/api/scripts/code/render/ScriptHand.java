@@ -6,8 +6,8 @@ import magmaout.mappet.utils.CapabilityTypes;
 import magmaout.mappet.capabilities.hand.Hand;
 import magmaout.mappet.network.Dispatcher;
 import magmaout.mappet.network.scripts.PacketCapability;
+import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ResourceLocation;
 
 public class ScriptHand implements IScriptHand {
     private final EntityPlayerMP player;
@@ -40,7 +40,7 @@ public class ScriptHand implements IScriptHand {
 
     @Override
     public String getSkinPath() {
-        return hand.skinPath.toString();
+        return hand.skinPath;
     }
 
     @Override
@@ -48,6 +48,16 @@ public class ScriptHand implements IScriptHand {
         return hand.skinType;
     }
 
+    @Override
+    public AbstractMorph getMorph() {
+        return this.hand.morph;
+    }
+
+    @Override
+    public void setMorph(AbstractMorph morph) {
+        this.hand.setMorph(morph);
+        this.sendToCapability();
+    }
 
     @Override
     public void resetAll() {

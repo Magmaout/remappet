@@ -1032,6 +1032,19 @@ public interface IScriptPlayer extends IScriptEntity {
     }
 
     /**
+     * Set entity's or entity's first person morph.
+     *
+     * <pre>{@code
+     *    var morph1 = mappet.createMorph("{Name:\"blockbuster.alex\"}");
+     *    var morph2 = mappet.createMorph("{Name:\"blockbuster.alex\"}");
+     *
+     *    c.getSubject().setMorph(morph1, false);
+     *    c.getSubject().setMorph(morph2, true);
+     * }</pre>
+     */
+    void setMorph(AbstractMorph morph, boolean isFirstPerson);
+
+    /**
      * Open UI for this player with default data populated.
      *
      * <p>By default, default data population is disabled, meaning that

@@ -1,9 +1,7 @@
 package magmaout.mappet.capabilities.hand;
 
+import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-
-import javax.vecmath.Vector3d;
 
 public interface IHand {
     void setSkinPath(String path);
@@ -33,6 +31,8 @@ public interface IHand {
 
     void setMainRender(boolean render);
     void setOffRender(boolean render);
+
+    void setMorph(AbstractMorph morph);
 
     NBTTagCompound serializeNBT();
     void deserializeNBT(NBTTagCompound tag);

@@ -238,7 +238,6 @@ public class ScriptFactory implements IScriptFactory {
         if (compound == null) {
             return null;
         }
-
         return MorphManager.INSTANCE.morphFromNBT(compound.getNBTTagCompound());
     }
 
@@ -246,7 +245,6 @@ public class ScriptFactory implements IScriptFactory {
     public IMappetUIBuilder createUI(String script, String function) {
         script = script == null ? "" : script;
         function = function == null ? "" : function;
-
         return new MappetUIBuilder(new UI(), script, function);
     }
 

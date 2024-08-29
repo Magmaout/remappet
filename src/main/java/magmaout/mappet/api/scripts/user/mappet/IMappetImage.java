@@ -1,5 +1,8 @@
 package magmaout.mappet.api.scripts.user.mappet;
 
+import magmaout.mappet.api.scripts.user.IScriptWorld;
+import magmaout.mappet.api.scripts.user.entities.IScriptPlayer;
+
 import javax.vecmath.Vector2d;
 import java.awt.image.BufferedImage;
 
@@ -42,11 +45,20 @@ public interface IMappetImage {
     String getPixelHex(int x, int y);
 
     /**
-     * Saving image to world/mappet/textures/name.png
+     * Download image to world/mappet/textures/name.png
      *
+     * @param world
      * @param name
      */
-    void saveToWorld(String name);
+    void downloadTo(IScriptWorld world, String name);
+
+    /**
+     * Download image to player config/blockbuster/models/image/name.png
+     *
+     * @param player
+     * @param name
+     */
+    void downloadTo(IScriptPlayer player, String name);
 
     /**
      * @return BufferedImage

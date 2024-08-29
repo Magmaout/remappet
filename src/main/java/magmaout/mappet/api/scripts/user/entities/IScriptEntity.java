@@ -1205,13 +1205,10 @@ public interface IScriptEntity {
      * <pre>{@code
      *    var morph = mappet.createMorph("{Name:\"blockbuster.alex\"}");
      *
-     *    // Assuming c.getSubject() is a player or an NPC
      *    c.getSubject().setMorph(morph);
      * }</pre>
-     *
-     * @return if entity's morph was changed successfully.
      */
-    public boolean setMorph(AbstractMorph morph);
+    public void setMorph(AbstractMorph morph);
 
     /**
      * Display a world morph to all players that see this entity (including themselves).

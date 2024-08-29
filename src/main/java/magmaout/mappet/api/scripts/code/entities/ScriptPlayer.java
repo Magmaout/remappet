@@ -40,10 +40,6 @@ import mchorse.metamorph.api.MorphUtils;
 import mchorse.metamorph.api.morphs.AbstractMorph;
 import mchorse.metamorph.capabilities.morphing.IMorphing;
 import mchorse.metamorph.capabilities.morphing.Morphing;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -516,23 +512,37 @@ public class ScriptPlayer extends ScriptEntity<EntityPlayerMP> implements IScrip
     @Override
     public AbstractMorph getMorph() {
         IMorphing cap = Morphing.get(this.entity);
-
         if (cap != null) {
             return cap.getCurrentMorph();
         }
-
         return super.getMorph();
     }
 
     @Override
-    public boolean setMorph(AbstractMorph morph) {
-        if (morph == null) {
-            MorphAPI.demorph(this.entity);
-        } else {
+    public void setMorph(AbstractMorph morph) {
+        if (morph != null) {
             MorphAPI.morph(this.entity, morph, true);
+        } else {
+            MorphAPI.demorph(this.entity);
+            Character character = Character.get(this.entity);
+            character.setFirstPersonMorph(null);
+            Dispatcher.sendTo(new PacketCapability(character.serializeNBT(), CapabilityTypes.CHARACTER), this.entity);
         }
+    }
 
-        return true;
+    @Override
+    public void setMorph(AbstractMorph morph, boolean isFirstPerson) {
+        if (isFirstPerson) {
+            Character character = Character.get(this.entity);
+            character.setFirstPersonMorph(morph);
+            Dispatcher.sendTo(new PacketCapability(character.serializeNBT(), CapabilityTypes.CHARACTER), this.entity);
+        } else {
+            if (morph != null) {
+                MorphAPI.morph(this.entity, morph, true);
+            } else {
+                MorphAPI.demorph(this.entity);
+            }
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import magmaout.mappet.network.huds.PacketHUDScene;
 import magmaout.mappet.utils.CurrentSession;
 import mchorse.metamorph.api.Morph;
 import mchorse.metamorph.api.MorphManager;
+import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,11 +35,17 @@ public class Character implements ICharacter {
     }
     public Map<String, Boolean> HUDs = this.createHUDs();
     public String HUDname;
+    public AbstractMorph morph = null;
     private States states = new States();
     private Instant lastClear = Instant.now();
     private CurrentSession session = new CurrentSession();
     private UIContext uiContext;
     private Map<String, List<HUDScene>> displayedHUDs = new HashMap<>();
+
+    @Override
+    public void setFirstPersonMorph(AbstractMorph morph) {
+        this.morph = morph;
+    }
 
     @Override
     public void setHUDName(String name){
@@ -83,6 +90,7 @@ public class Character implements ICharacter {
         tag.setTag("States", this.states.serializeNBT());
         tag.setString("LastClear", this.lastClear.toString());
         tag.setTag("DisplayedHUDs", serializeDisplayedHUDs());
+        tag.setTag("FirstPersonMorph", this.morph != null ? this.morph.toNBT() : new NBTTagCompound());
 
         this.HUDs.keySet().forEach((key) -> tag.setBoolean(key, this.HUDs.get(key)));
 
@@ -91,6 +99,10 @@ public class Character implements ICharacter {
 
     @Override
     public void deserializeNBT(NBTTagCompound tag) {
+        if (tag.hasKey("FirstPersonMorph")) {
+            this.morph = !tag.getTag("FirstPersonMorph").hasNoTags() ? MorphManager.INSTANCE.morphFromNBT(tag.getCompoundTag("FirstPersonMorph")) : null;
+        }
+
         if (tag.hasKey("States")) {
             this.states.deserializeNBT(tag.getCompoundTag("States"));
         }

@@ -783,6 +783,13 @@ public class EventHandler {
 
     @SideOnly(Side.CLIENT)
     private void onPlayerTickClient(TickEvent.PlayerTickEvent event) {
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        Character character = Character.get(player);
+        Hand hand = Hand.get(player);
+
+        if (character.morph != null) character.morph.update(player);
+        if (hand.morph != null) hand.morph.update(player);
+
         RenderingHandler.update();
         KeyboardHandler.updateHeldKeys();
         MappetHands.updateEquippedItem();
@@ -851,26 +858,18 @@ public class EventHandler {
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
+    public void onWorldRender(RenderWorldLastEvent event) {
+        if (Character.get(Minecraft.getMinecraft().player).morph != null) MappetHands.renderArms();
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
     public void onHandRender(RenderHandEvent event) {
-        calculateInterp(CapabilityTypes.HAND, Minecraft.getMinecraft().player, Minecraft.getSystemTime());
-        if (Metamorph.disableFirstPersonHand.get()) {
-            event.setCanceled(true);
-            MappetHands.renderArms();
-        } else {
-            EntityPlayer player = Minecraft.getMinecraft().player;
-            Hand hand = Hand.get(player);
-            if (player.getPrimaryHand() == EnumHandSide.LEFT) {
-                GlStateManager.rotate((float) hand.mainRotations.x, 1, 0, 0);
-                GlStateManager.rotate((float) hand.mainRotations.y, 0, -1, 0);
-                GlStateManager.rotate((float) hand.mainRotations.z, 0, 0, -1);
-                GlStateManager.translate(hand.mainPosition.x, hand.mainPosition.y, hand.mainPosition.z);
-            } else {
-                GlStateManager.rotate((float) hand.mainRotations.x, 1, 0, 0);
-                GlStateManager.rotate((float) hand.mainRotations.y, 0, 1, 0);
-                GlStateManager.rotate((float) hand.mainRotations.z, 0, 0, 1);
-                GlStateManager.translate(hand.mainPosition.x, hand.mainPosition.y, hand.mainPosition.z);
-            }
-        }
+        EntityPlayer player =  Minecraft.getMinecraft().player;
+        calculateInterp(CapabilityTypes.HAND, player, Minecraft.getSystemTime());
+        Hand hand = Hand.get(player);
+        event.setCanceled(true);
+        if (Character.get(Minecraft.getMinecraft().player).morph == null) MappetHands.renderArms();
     }
 
     private void calculateInterp(CapabilityTypes type, EntityPlayer player, long systemTime) { switch (type) {

@@ -87,6 +87,7 @@ public class Dispatcher {
             this.register(PacketRepl.class, PacketRepl.ClientHandler.class, Side.CLIENT);
             this.register(PacketRepl.class, PacketRepl.ServerHandler.class, Side.SERVER);
             this.register(PacketSound.class, PacketSound.ClientHandler.class, Side.CLIENT);
+            this.register(PacketDownloadImage.class, PacketDownloadImage.ClientHandler.class, Side.CLIENT);
             this.register(PacketWorldMorph.class, PacketWorldMorph.ClientHandler.class, Side.CLIENT);
 
             /* HUD & UI */

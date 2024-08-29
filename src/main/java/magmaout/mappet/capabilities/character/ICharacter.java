@@ -4,6 +4,7 @@ import magmaout.mappet.api.huds.HUDScene;
 import magmaout.mappet.api.states.States;
 import magmaout.mappet.api.ui.UIContext;
 import magmaout.mappet.utils.CurrentSession;
+import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface ICharacter extends INBTSerializable<NBTTagCompound> {
+    void setFirstPersonMorph(AbstractMorph morph);
+
     void setHUDName(String name);
 
     String getHUDName();

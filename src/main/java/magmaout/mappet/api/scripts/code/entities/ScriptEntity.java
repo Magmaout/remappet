@@ -1005,27 +1005,21 @@ public class ScriptEntity<T extends Entity> implements IScriptEntity {
     }
 
     @Override
-    public boolean setMorph(AbstractMorph morph) {
+    public void setMorph(AbstractMorph morph) {
         if (Loader.isModLoaded("blockbuster")) {
-            return this.setActorsMorph(morph);
+            this.setActorsMorph(morph);
         }
-
-        return false;
     }
 
     @Optional.Method(modid = "blockbuster")
-    private boolean setActorsMorph(AbstractMorph morph) {
+    private void setActorsMorph(AbstractMorph morph) {
         if (this.entity instanceof EntityActor) {
             EntityActor actor = (EntityActor) this.entity;
             actor.morph.setDirect(morph);
 
             PacketModifyActor message = new PacketModifyActor(actor);
             mchorse.blockbuster.network.Dispatcher.sendToTracked(actor, message);
-
-            return true;
         }
-
-        return false;
     }
 
     @Override

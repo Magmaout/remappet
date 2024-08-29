@@ -39,7 +39,6 @@ public class HUDMorph implements INBTSerializable<NBTTagCompound> {
             this.entity.renderYawOffset = this.entity.prevRenderYawOffset = 0.0F;
             this.entity.onGround = true;
         }
-
         return this.entity;
     }
 

@@ -5,7 +5,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3d;
 
 public class Camera implements ICamera {
     private EntityPlayer player;

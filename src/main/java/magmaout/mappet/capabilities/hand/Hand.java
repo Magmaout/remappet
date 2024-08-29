@@ -1,15 +1,17 @@
 package magmaout.mappet.capabilities.hand;
 
+import mchorse.metamorph.api.MorphManager;
+import mchorse.metamorph.api.morphs.AbstractMorph;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 
 import javax.vecmath.Vector3d;
 
 public class Hand implements IHand {
     private EntityPlayer player;
+
+    public AbstractMorph morph = null;
 
     public String skinPath = new String();
     public String skinType = new String();
@@ -41,7 +43,6 @@ public class Hand implements IHand {
     public String offInterpPosition = "linear";
     public long offDurationPosition = 0L;
     public long offSystemtimePosition = 0L;
-
 
     public static Hand get(EntityPlayer player) {
         IHand capability = player == null ? null : player.getCapability(HandProvider.HAND, null);
@@ -105,6 +106,9 @@ public class Hand implements IHand {
     public void setMainRender(boolean render) { this.mainRender = render; }
     @Override
     public void setOffRender(boolean render) { this.offRender = render; }
+
+    @Override
+    public void setMorph(AbstractMorph morph) { this.morph = morph; }
 
     @Override
     public NBTTagCompound serializeNBT() {
@@ -200,6 +204,7 @@ public class Hand implements IHand {
         skin.setString("type", this.skinType);
         tag.setTag("skin", skin);
 
+        tag.setTag("morph", this.morph != null ? this.morph.toNBT() : new NBTTagCompound());
         return tag;
     }
 
@@ -260,6 +265,10 @@ public class Hand implements IHand {
 
             this.skinPath = skin.getString("path");
             this.skinType = skin.getString("type");
+        }
+
+        if (tag.hasKey("morph")) {
+            this.morph = !tag.getTag("morph").hasNoTags() ? MorphManager.INSTANCE.morphFromNBT(tag.getCompoundTag("morph")) : null;
         }
     }
 }
